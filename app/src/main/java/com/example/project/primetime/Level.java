@@ -12,12 +12,12 @@ import android.view.View;
 /**
  * Created by amin on 4/19/2015.
  */
-public class MyBringBack extends View {
+public class Level extends View {
 
     Bitmap wSquare;
     float changingY;
 
-    public MyBringBack(Context context) {
+    public Level(Context context) {
         super(context);
         wSquare = BitmapFactory.decodeResource(getResources(), R.drawable.square);
         changingY = 0;

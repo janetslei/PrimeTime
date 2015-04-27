@@ -22,7 +22,7 @@ public class Instructions extends Activity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent("com.example.project.primetime.GAME");
+                Intent intent = new Intent("com.example.project.primetime.GFXLEVEL");
                 startActivity(intent);
             }
         });
