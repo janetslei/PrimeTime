@@ -13,13 +13,13 @@ import java.util.Random;
 public class Game extends Activity implements View.OnTouchListener {
 
     Button oButton;
-    Level ourView;
+    MyBringBack ourView;
 
     String levels[] = { "MainActivity", "Instructions", "game"};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ourView = new Level(this);
+        ourView = new MyBringBack(this);
         setContentView(ourView);
         //Random rand = new Random(System.currentTimeMillis());
         //int option = rand.nextInt(2);
