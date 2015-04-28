@@ -25,4 +25,13 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="95dp" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="   Created by:\n\nAustin Waters\nJanet Sleiman\nDanny Stieben"
+        android:id="@+id/textView2"
+        android:textSize="25dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>
