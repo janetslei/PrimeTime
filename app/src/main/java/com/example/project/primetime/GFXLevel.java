@@ -8,10 +8,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -63,11 +65,13 @@ public class GFXLevel extends Activity implements View.OnTouchListener {
         ourSurfaceView = new LevelSurface(this);
         ourSurfaceView.setOnTouchListener(this);
 
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+
         x = 0;
         y = 0;
         rect1 = new Rect();
         primeButton = new Rect();
-        squareSize = 90;
+        squareSize = screenWidth/8;
         selectedX = -1;
         selectedY = -1;
         tapped = false;
