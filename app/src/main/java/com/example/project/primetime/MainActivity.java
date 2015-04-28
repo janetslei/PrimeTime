@@ -21,11 +21,8 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View v) {
-                System.out.println("Before");
                 Intent intent = new Intent("com.example.project.primetime.INSTRUCTIONS");
-                System.out.println("After");
                 startActivity(intent);
-                System.out.println("After 2");
             }
         });
     }

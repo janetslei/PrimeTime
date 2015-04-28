@@ -2,13 +2,16 @@ package com.example.project.primetime;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -41,31 +44,66 @@ public class GFXLevel extends Activity implements View.OnTouchListener {
 
     int numOfSquares;
 
+    int score;
+
+    int remainingTime;
+
+    boolean outOfTime;
+
+    CountDownTimer myTimer;
+
+    Rect primeButton;
+
     float minHeight, maxHeight, minWidth, maxWidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //TODO Auto-generated method stub
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.game);
         ourSurfaceView = new LevelSurface(this);
         ourSurfaceView.setOnTouchListener(this);
+
         x = 0;
         y = 0;
         rect1 = new Rect();
+        primeButton = new Rect();
         squareSize = 90;
         selectedX = -1;
         selectedY = -1;
         tapped = false;
+        score = 0;
+        outOfTime = false;
+
+        myTimer = new CountDownTimer(30000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                remainingTime = (int)millisUntilFinished / 1000;
+                if(remainingTime == 1) outOfTime = true;
+            }
+
+            public void onFinish() {
+            }
+        };
+
+        myTimer.start();
 
         minHeight = squareSize * 3;
         maxHeight = minHeight + (8 * squareSize);
         minWidth = squareSize;
         maxWidth = minWidth + (6 * squareSize);
 
+        generateSquares();
+
+        //test = BitmapFactory.decodeResource(getResources(), R.drawable.square);
+        //selected = BitmapFactory.decodeResource(getResources(), R.drawable.selected);
+        setContentView(ourSurfaceView);
+    }
+
+    void generateSquares()
+    {
         Random r = new Random(System.currentTimeMillis());
 
-        numOfSquares = r.nextInt(11) + 1;
+        numOfSquares = r.nextInt(17) + 1;
 
         for(int i = 0; i < 6; i++)
         {
@@ -103,9 +141,18 @@ public class GFXLevel extends Activity implements View.OnTouchListener {
             else if(colorNum == 3) grid[xPos][yPos].color.setColor(Color.RED);
             grid[xPos][yPos].color.setStyle(Paint.Style.FILL);
         }
-        //test = BitmapFactory.decodeResource(getResources(), R.drawable.square);
-        //selected = BitmapFactory.decodeResource(getResources(), R.drawable.selected);
-        setContentView(ourSurfaceView);
+    }
+
+    void youLose()
+    {
+        Intent intent = new Intent("com.example.project.primetime.LOSE");
+        intent.putExtra("score", score);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Do Here what ever you want do on back press;
     }
 
     @Override
@@ -185,7 +232,105 @@ public class GFXLevel extends Activity implements View.OnTouchListener {
 
                 canvas.drawRGB(255, 255, 255);
 
-                if(x >= minWidth && x <= maxWidth && y >= minHeight && y <= maxHeight && tapped)
+                int squaresInHeight = 0;
+                int expectedNumberOfSquares = -1;
+                int currentY;
+                int topSquare = -1;
+                int rectWidth = -1;
+
+                boolean winner = true;
+
+                for(int i = 0; i < 6; i++) {
+                    squaresInHeight = 0;
+                    currentY = -1;
+                    for (int j = 0; j < 8; j++) {
+                        if (grid[i][j].containsSquare) {
+                            if(topSquare == -1) topSquare = j;
+                            if(currentY == -1) currentY = j;
+                            else if((currentY + 1) != j) {
+                                winner = false;
+                            }
+                            else currentY = j;
+
+                            if(j < topSquare) winner = false;
+                            if(expectedNumberOfSquares != -1 && j >= topSquare + expectedNumberOfSquares) winner = false;
+                            squaresInHeight += 1;
+                        }
+                    }
+                    if(expectedNumberOfSquares == -1){
+                        if(squaresInHeight != 0) {
+                            expectedNumberOfSquares = squaresInHeight;
+                            if(expectedNumberOfSquares > 1) {
+                                if(numOfSquares % expectedNumberOfSquares == 0) {
+                                    rectWidth = numOfSquares/expectedNumberOfSquares;
+                                    if(rectWidth == 1) {
+                                        winner = false;
+                                    }
+                                }
+                                else {
+                                    winner = false;
+                                }
+                            }
+                            else
+                            {
+                                winner = false;
+                            }
+                        }
+                    }
+                    else if(expectedNumberOfSquares != squaresInHeight && rectWidth > 1) {
+                        winner = false;
+                    }
+                    else
+                    {
+                        rectWidth -= 1;
+                        if(rectWidth == 1) break;
+                    }
+                }
+
+                for(int i = 0; i < 6; i++) {
+                    for (int j = 0; j < 8; j++) {
+                        if (grid[i][j].containsSquare) {
+                            if (!grid[i][j].selected)
+                                canvas.drawRect(grid[i][j].location, grid[i][j].color);
+                            else {
+                                Paint selectedColor = new Paint();
+                                selectedColor.setColor(Color.BLACK);
+                                selectedColor.setStyle(Paint.Style.FILL);
+                                canvas.drawRect(grid[i][j].location, selectedColor);
+                            }
+                        }
+                    }
+                }
+
+                if(winner) {
+                    generateSquares();
+                    score += remainingTime;
+                    myTimer.start();
+                }
+
+                if(outOfTime) {
+                    youLose();
+                }
+
+                if(y > (canvas.getHeight() - 200) && tapped)
+                {
+                    tapped = false;
+                    boolean isPrime = true;
+                    for(int i = 2; i < (numOfSquares/2) + 1; i++)
+                    {
+                        if(numOfSquares % i == 0) isPrime = false;
+                    }
+                    if(isPrime) {
+                        generateSquares();
+                        score += remainingTime;
+                        myTimer.start();
+                    }
+                    else
+                    {
+                        youLose();
+                    }
+                }
+                else if(x >= minWidth && x <= maxWidth && y >= minHeight && y <= maxHeight && tapped)
                 {
                     tapped = false;
                     int xPos = (int)(x - minWidth) / 90;
@@ -221,41 +366,62 @@ public class GFXLevel extends Activity implements View.OnTouchListener {
                         }
                     }
                 }
+                primeButton.set(0, (canvas.getHeight() - 180), canvas.getWidth(), canvas.getHeight());
+                Paint primeColor = new Paint();
+                primeColor.setColor(Color.CYAN);
+                primeColor.setStyle(Paint.Style.FILL);
+                Paint textColor = new Paint();
+                textColor.setColor(Color.BLACK);
+                textColor.setStyle(Paint.Style.FILL);
+                canvas.drawRect(primeButton, primeColor);
+                Paint text = new Paint();
+                text.setColor(Color.WHITE);
+                text.setTextSize(100);
+                String primeText = "Is Prime!";
+                RectF bounds = new RectF(primeButton);
+                bounds.right = text.measureText(primeText, 0, primeText.length());
+                bounds.bottom = text.descent() - text.ascent();
+                bounds.left += (primeButton.width() - bounds.right) / 2.0f;
+                bounds.top += (primeButton.height() - bounds.bottom) /2.0f;
+                canvas.drawText(primeText, bounds.left, bounds.top - text.ascent(), text);
 
-                for(int i = 0; i < 6; i++)
-                {
-                    for(int j = 0; j < 8; j++)
-                    {
-                        if(grid[i][j].containsSquare)
-                        {
-                            if(!grid[i][j].selected) canvas.drawRect(grid[i][j].location, grid[i][j].color);
-                            else {
-                                Paint selectedColor = new Paint();
-                                selectedColor.setColor(Color.BLACK);
-                                selectedColor.setStyle(Paint.Style.FILL);
-                                canvas.drawRect(grid[i][j].location, selectedColor);
-                            }
-                        }
-                    }
-                }
+                //Score Text
+                Rect backTangle = new Rect();
+                backTangle.set(canvas.getWidth()/2 + 20, 0, canvas.getWidth(), 100);
+                Paint scoreText = new Paint();
+                String scoreString = String.valueOf(score);
+                scoreText.setTextSize(70);
+                scoreText.setColor(Color.BLACK);
+                bounds.right = scoreText.measureText(scoreString, 0, scoreString.length());
+                bounds.bottom = scoreText.descent() - scoreText.ascent();
+                bounds.left = (backTangle.width() - bounds.right) + canvas.getWidth()/2;
+                bounds.top = (backTangle.height() - bounds.bottom) /2.0f;
+                canvas.drawText(scoreString, bounds.left, bounds.top - scoreText.ascent(), scoreText);
 
-                /*if(x <= maxWidth && x >= minWidth && y >= minHeight && y <= maxHeight)
-                {
-                    rect1.set((int)x - (canvas.getWidth()/16), (int)y - (canvas.getWidth()/16), (canvas.getWidth()/8) - (canvas.getWidth()/16) + (int)x, (canvas.getWidth()/8) - (canvas.getWidth()/16) + (int)y);
-                    Paint blue = new Paint();
-                    blue.setColor(Color.BLUE);
-                    blue.setStyle(Paint.Style.FILL);
-                    //canvas.drawBitmap(test , x-(test.getWidth()/2), y-(test.getHeight()/2), null);
-                    canvas.drawRect(rect1, blue);
-                }
-                if(startX != 0 && startY != 0)
-                {
-                    //canvas.drawBitmap(selected , startX-(selected.getWidth()/2), startY-(selected.getHeight()/2), null);
-                }
-                if(finishX != 0 && finishY != 0)
-                {
-                   // canvas.drawBitmap(selected , finishX-(selected.getWidth()/2), finishY-(selected.getHeight()/2), null);
-                }*/
+                //Timer Text
+                backTangle.set(0, 0, canvas.getWidth(), 100);
+                Paint timerText = new Paint();
+                String timerString = String.valueOf(remainingTime);
+                timerText.setTextSize(70);
+                timerText.setColor(Color.BLACK);
+                bounds = new RectF(backTangle);
+                bounds.right = timerText.measureText(timerString, 0, timerString.length());
+                bounds.bottom = timerText.descent() - timerText.ascent();
+                bounds.left += (backTangle.width() - bounds.right) / 2.0f;
+                bounds.top += (backTangle.height() - bounds.bottom) /2.0f;
+                canvas.drawText(timerString, bounds.left, bounds.top - timerText.ascent(), timerText);
+
+                //Number of Squares Text
+                backTangle.set(canvas.getWidth()/2 + 20, 0, canvas.getWidth(), 100);
+                Paint numberText = new Paint();
+                String numberString = String.valueOf(numOfSquares);
+                numberText.setTextSize(70);
+                numberText.setColor(Color.BLACK);
+                bounds.right = numberText.measureText(numberString, 0, numberString.length());
+                bounds.bottom = numberText.descent() - numberText.ascent();
+                bounds.left = 20.0f;
+                bounds.top = (backTangle.height() - bounds.bottom) /2.0f;
+                canvas.drawText(numberString, bounds.left, bounds.top - numberText.ascent(), numberText);
                 ourHolder.unlockCanvasAndPost(canvas);
             }
         }
