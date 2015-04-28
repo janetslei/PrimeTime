@@ -337,8 +337,8 @@ public class GFXLevel extends Activity implements View.OnTouchListener {
                 else if(x >= minWidth && x <= maxWidth && y >= minHeight && y <= maxHeight && tapped)
                 {
                     tapped = false;
-                    int xPos = (int)(x - minWidth) / 90;
-                    int yPos = (int)(y - minHeight) / 90;
+                    int xPos = (int)(x - minWidth) / (int)squareSize;
+                    int yPos = (int)(y - minHeight) / (int)squareSize;
 
                     if(grid[xPos][yPos].containsSquare)
                     {
