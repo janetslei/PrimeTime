@@ -11,13 +11,25 @@
         android:id="@+id/textInstructions"
         android:textSize="50dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="38dp" />
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="OKAY"
         android:id="@+id/okayButton"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width= "wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity = "center"
+        android:text="Welcome to Prime Time! \n\nGuess if the number is a prime or not!\n\nIf you think it&apos;s a prime number, click on &quot;Is Prime!&quot;.\n\nIf you think it&apos;s a composite number, rearrange the small colorful blocks  to form a rectangle or square.\n\nIf you guess correctly, you get 50 points.\n\nRace against time and complete all the challenges! "
+        android:id="@+id/textView"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
 </RelativeLayout>
